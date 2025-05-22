@@ -4,6 +4,10 @@ from pyspark.sql.types import *
 import json
 import sys
 import os
+import threading
+import time
+from datetime import datetime
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config.kafka_config import KAFKA_SERVERS, TOPICS
 
@@ -15,6 +19,16 @@ class WarehouseMonitoring:
             .getOrCreate()
         
         self.spark.sparkContext.setLogLevel("WARN")
+        
+        # Lock untuk thread-safe printing
+        self.print_lock = threading.Lock()
+    
+    def safe_print(self, message):
+        """Thread-safe printing method"""
+        with self.print_lock:
+            print(message)
+            # Flush output untuk memastikan langsung tampil
+            sys.stdout.flush()
     
     def create_kafka_stream(self, topic):
         """Create Kafka stream for given topic"""
@@ -24,6 +38,7 @@ class WarehouseMonitoring:
             .option("kafka.bootstrap.servers", ",".join(KAFKA_SERVERS)) \
             .option("subscribe", topic) \
             .option("startingOffsets", "latest") \
+            .option("failOnDataLoss", "false") \
             .load()
     
     def process_temperature_stream(self):
@@ -79,7 +94,7 @@ class WarehouseMonitoring:
     def join_streams_and_detect_critical(self, temp_stream, humidity_stream):
         """Join temperature and humidity streams to detect critical conditions"""
         
-        # Add watermark for event time processing (now timestamp is proper timestamp type)
+        # Add watermark for event time processing
         temp_with_watermark = temp_stream.withWatermark("timestamp", "10 seconds")
         humidity_with_watermark = humidity_stream.withWatermark("timestamp", "10 seconds")
         
@@ -111,55 +126,91 @@ class WarehouseMonitoring:
         return status_stream
     
     def print_temperature_alerts(self, high_temp_stream):
-        """Print temperature alerts"""
+        """Print temperature alerts using thread-safe method"""
         def process_temp_batch(df, epoch_id):
             if not df.isEmpty():
-                print("\n" + "="*50)
-                print("[PERINGATAN SUHU TINGGI]")
-                print("="*50)
+                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                
+                # Build complete output string
+                output_lines = []
+                output_lines.append("")
+                output_lines.append("="*50)
+                output_lines.append(f"[PERINGATAN SUHU TINGGI] - {timestamp}")
+                output_lines.append("="*50)
+                
                 for row in df.collect():
-                    print(f"Gudang {row.gudang_id}: Suhu {row.suhu}°C")
-                print("="*50)
+                    output_lines.append(f"Gudang {row.gudang_id}: Suhu {row.suhu}°C")
+                
+                output_lines.append("="*50)
+                
+                # Print as single block
+                self.safe_print("\n".join(output_lines))
         
         return high_temp_stream.writeStream \
             .outputMode("append") \
             .foreachBatch(process_temp_batch) \
+            .option("checkpointLocation", "/tmp/checkpoint/temp") \
+            .trigger(processingTime='5 seconds') \
             .start()
     
     def print_humidity_alerts(self, high_humidity_stream):
-        """Print humidity alerts"""
+        """Print humidity alerts using thread-safe method"""
         def process_humidity_batch(df, epoch_id):
             if not df.isEmpty():
-                print("\n" + "="*50)
-                print("[PERINGATAN KELEMBABAN TINGGI]")
-                print("="*50)
+                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                
+                # Build complete output string
+                output_lines = []
+                output_lines.append("")
+                output_lines.append("="*50)
+                output_lines.append(f"[PERINGATAN KELEMBABAN TINGGI] - {timestamp}")
+                output_lines.append("="*50)
+                
                 for row in df.collect():
-                    print(f"Gudang {row.gudang_id}: Kelembaban {row.kelembaban}%")
-                print("="*50)
+                    output_lines.append(f"Gudang {row.gudang_id}: Kelembaban {row.kelembaban}%")
+                
+                output_lines.append("="*50)
+                
+                # Print as single block
+                self.safe_print("\n".join(output_lines))
         
         return high_humidity_stream.writeStream \
             .outputMode("append") \
             .foreachBatch(process_humidity_batch) \
+            .option("checkpointLocation", "/tmp/checkpoint/humidity") \
+            .trigger(processingTime='6 seconds') \
             .start()
     
     def print_combined_status(self, combined_stream):
-        """Print combined warehouse status"""
+        """Print combined warehouse status using thread-safe method"""
         def process_combined_batch(df, epoch_id):
             if not df.isEmpty():
-                print("\n" + "="*70)
-                print("[STATUS GABUNGAN GUDANG]")
-                print("="*70)
+                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                
+                # Build complete output string
+                output_lines = []
+                output_lines.append("")
+                output_lines.append("="*70)
+                output_lines.append(f"[STATUS GABUNGAN GUDANG] - {timestamp}")
+                output_lines.append("="*70)
+                
                 for row in df.collect():
-                    print(f"Gudang {row.gudang_id}:")
-                    print(f"  - Suhu: {row.suhu}°C")
-                    print(f"  - Kelembaban: {row.kelembaban}%")
-                    print(f"  - Status: {row.status}")
-                    print("-" * 40)
-                print("="*70)
+                    output_lines.append(f"Gudang {row.gudang_id}:")
+                    output_lines.append(f"  - Suhu: {row.suhu}°C")
+                    output_lines.append(f"  - Kelembaban: {row.kelembaban}%")
+                    output_lines.append(f"  - Status: {row.status}")
+                    output_lines.append("-" * 40)
+                
+                output_lines.append("="*70)
+                
+                # Print as single block
+                self.safe_print("\n".join(output_lines))
         
         return combined_stream.writeStream \
             .outputMode("append") \
             .foreachBatch(process_combined_batch) \
+            .option("checkpointLocation", "/tmp/checkpoint/combined") \
+            .trigger(processingTime='8 seconds') \
             .start()
     
     def start_monitoring(self):
@@ -177,18 +228,21 @@ class WarehouseMonitoring:
             # Join streams for combined analysis
             combined_stream = self.join_streams_and_detect_critical(temp_stream, humidity_stream)
             
-            # Start streaming queries
+            # Start streaming queries dengan trigger yang benar
             temp_query = self.print_temperature_alerts(high_temp_stream)
             humidity_query = self.print_humidity_alerts(high_humidity_stream)
             combined_query = self.print_combined_status(combined_stream)
             
+            print("All streaming queries started successfully!")
+            print("Press Ctrl+C to stop monitoring...")
+            
             # Wait for termination
             temp_query.awaitTermination()
-            humidity_query.awaitTermination()
-            combined_query.awaitTermination()
             
         except KeyboardInterrupt:
-            print("Monitoring stopped by user")
+            print("\nMonitoring stopped by user")
+        except Exception as e:
+            print(f"Error occurred: {str(e)}")
         finally:
             self.spark.stop()
 
