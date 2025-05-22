@@ -2,7 +2,7 @@
 
 Sistem monitoring gudang real-time menggunakan Apache Kafka dan PySpark untuk memantau sensor suhu dan kelembaban di berbagai gudang.
 
-## 📋 Daftar Isi
+## Daftar Isi
 - [Gambaran Umum](#gambaran-umum)
 - [Fitur](#fitur)
 - [Prasyarat](#prasyarat)
@@ -13,7 +13,7 @@ Sistem monitoring gudang real-time menggunakan Apache Kafka dan PySpark untuk me
 - [Output Monitoring](#output-monitoring)
 - [Troubleshooting](#troubleshooting)
 
-## 🎯 Gambaran Umum
+## Gambaran Umum
 
 Proyek ini mensimulasikan sistem monitoring gudang real-time untuk sebuah perusahaan logistik yang mengelola beberapa gudang penyimpanan barang sensitif (makanan, obat-obatan, elektronik). Sistem memantau sensor suhu dan kelembaban yang mengirim data setiap detik dan memberikan peringatan real-time untuk kondisi kritis.
 
@@ -23,7 +23,7 @@ Proyek ini mensimulasikan sistem monitoring gudang real-time untuk sebuah perusa
 - Transmisi data setiap detik
 - Monitoring real-time untuk mencegah kerusakan akibat suhu tinggi atau kelembaban berlebih
 
-## ✨ Fitur
+## Fitur
 
 - **Streaming Data Real-time**: Producer Kafka mensimulasikan data sensor setiap detik
 - **Pemrosesan Stream**: PySpark memproses stream data dengan filtering dan join
@@ -34,13 +34,13 @@ Proyek ini mensimulasikan sistem monitoring gudang real-time untuk sebuah perusa
   - Kedua kondisi → Peringatan kritis
 - **Time-window Joins**: Menggabungkan data suhu dan kelembaban dalam window 10 detik
 
-## 📋 Prasyarat
+## Prasyarat
 
 - **Sistem Operasi**: Linux/WSL2
 - **Java**: OpenJDK 11 atau lebih baru
 - **Python**: 3.8 atau lebih baru
 
-## 🔧 Instalasi
+## Instalasi
 
 ### 1. Update Sistem dan Instalasi Java
 
@@ -158,7 +158,7 @@ bin/kafka-topics.sh --create --topic sensor-kelembaban-gudang --bootstrap-server
 bin/kafka-topics.sh --list --bootstrap-server localhost:9092
 ```
 
-## 📁 Struktur Proyek
+## Struktur Proyek
 
 ```
 kafka-warehouse-monitoring/
@@ -181,7 +181,7 @@ mkdir -p ~/kafka-warehouse-monitoring/{producers,consumer,config}
 cd ~/kafka-warehouse-monitoring
 ```
 
-## ⚙️ Konfigurasi
+##  Konfigurasi
 
 ### config/kafka_config.py
 ```python
@@ -201,7 +201,7 @@ pyspark==3.4.1
 findspark==2.0.1
 ```
 
-## 🚀 Cara Penggunaan
+## Cara Penggunaan
 
 ### Langkah 1: Start Layanan Kafka
 
@@ -235,7 +235,7 @@ cd ~/kafka-warehouse-monitoring
 python3 consumer/spark_consumer.py
 ```
 
-## 📊 Output Monitoring
+## Output Monitoring
 
 Sistem menghasilkan tiga jenis output monitoring:
 
@@ -281,7 +281,7 @@ Gudang G3:
 ======================================================================
 ```
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Masalah Umum dan Solusi
 
