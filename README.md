@@ -5,7 +5,6 @@ Sistem monitoring gudang real-time menggunakan Apache Kafka dan PySpark untuk me
 ## 📋 Daftar Isi
 - [Gambaran Umum](#gambaran-umum)
 - [Fitur](#fitur)
-- [Arsitektur](#arsitektur)
 - [Prasyarat](#prasyarat)
 - [Instalasi](#instalasi)
 - [Struktur Proyek](#struktur-proyek)
@@ -13,7 +12,6 @@ Sistem monitoring gudang real-time menggunakan Apache Kafka dan PySpark untuk me
 - [Cara Penggunaan](#cara-penggunaan)
 - [Output Monitoring](#output-monitoring)
 - [Troubleshooting](#troubleshooting)
-- [Kontribusi](#kontribusi)
 
 ## 🎯 Gambaran Umum
 
@@ -36,24 +34,11 @@ Proyek ini mensimulasikan sistem monitoring gudang real-time untuk sebuah perusa
   - Kedua kondisi → Peringatan kritis
 - **Time-window Joins**: Menggabungkan data suhu dan kelembaban dalam window 10 detik
 
-## 🏗️ Arsitektur
-
-```
-Sensor → Producer Kafka → Topik Kafka → Consumer PySpark → Peringatan
-   ↓         ↓               ↓              ↓               ↓
-Sensor    Sensor      sensor-suhu-    Pemrosesan Stream    Output
-Suhu   Kelembaban     gudang Topic    & Filtering         Console
-                      sensor-kelembaban-
-                      gudang Topic
-```
-
 ## 📋 Prasyarat
 
 - **Sistem Operasi**: Linux/WSL2
 - **Java**: OpenJDK 11 atau lebih baru
 - **Python**: 3.8 atau lebih baru
-- **Memory**: Minimal 4GB RAM
-- **Storage**: 2GB ruang kosong
 
 ## 🔧 Instalasi
 
@@ -356,61 +341,3 @@ java -version
 python3 --version
 spark-shell --version
 ```
-
-## 🏆 Tujuan Pembelajaran
-
-Proyek ini mendemonstrasikan:
-- Pemrosesan data real-time dengan Apache Kafka
-- Pemrosesan stream dan filtering dengan PySpark
-- Multi-stream joins dengan time windows
-- Event-time processing dan watermarking
-- Sistem peringatan real-time
-- Arsitektur microservices dengan message queues
-
-## 📝 Fitur yang Diimplementasikan
-
-- [x] Dua topik Kafka: `sensor-suhu-gudang` dan `sensor-kelembaban-gudang`
-- [x] Producer suhu mengirim data setiap detik
-- [x] Producer kelembaban mengirim data setiap detik
-- [x] Dukungan untuk 3 gudang: G1, G2, G3
-- [x] Consumer PySpark untuk konsumsi data
-- [x] Filtering: suhu > 80°C dan kelembaban > 70%
-- [x] Stream joining berdasarkan ID gudang dan time window
-- [x] Deteksi kondisi kritis (suhu > 80°C DAN kelembaban > 70%)
-- [x] Output console terformat dengan peringatan
-
-## 🤝 Kontribusi
-
-1. Fork repository ini
-2. Buat feature branch (`git checkout -b feature/FiturMenakjubkan`)
-3. Commit perubahan Anda (`git commit -m 'Menambahkan FiturMenakjubkan'`)
-4. Push ke branch (`git push origin feature/FiturMenakjubkan`)
-5. Buka Pull Request
-
-## 📄 Lisensi
-
-Proyek ini dilisensikan di bawah Lisensi MIT - lihat file [LICENSE](LICENSE) untuk detail.
-
-## 🙏 Ucapan Terima Kasih
-
-- Komunitas Apache Kafka
-- Komunitas Apache Spark
-- Komunitas Python Kafka
-
-## 📞 Dukungan
-
-Jika mengalami masalah:
-1. Periksa bagian [Troubleshooting](#troubleshooting)
-2. Verifikasi semua prasyarat terpenuhi
-3. Pastikan semua layanan berjalan dengan urutan yang benar
-4. Periksa log untuk pesan error spesifik
-
-## 📚 Referensi Tambahan
-
-- [Dokumentasi Apache Kafka](https://kafka.apache.org/documentation/)
-- [Dokumentasi Apache Spark](https://spark.apache.org/docs/latest/)
-- [PySpark Structured Streaming Guide](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html)
-
----
-
-**Selamat Monitoring! 🚀**
