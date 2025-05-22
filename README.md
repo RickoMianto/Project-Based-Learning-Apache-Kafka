@@ -1,137 +1,135 @@
-# Apache Kafka
+# Sistem Monitoring Gudang dengan Apache Kafka
 
-# Apache Kafka Warehouse Monitoring System
+Sistem monitoring gudang real-time menggunakan Apache Kafka dan PySpark untuk memantau sensor suhu dan kelembaban di berbagai gudang.
 
-Real-time warehouse monitoring system using Apache Kafka and PySpark for tracking temperature and humidity sensors in multiple warehouses.
-
-## 📋 Table of Contents
-- [Overview](#overview)
-- [Features](#features)
-- [Architecture](#architecture)
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-- [Project Structure](#project-structure)
-- [Configuration](#configuration)
-- [Usage](#usage)
-- [Monitoring Output](#monitoring-output)
+## 📋 Daftar Isi
+- [Gambaran Umum](#gambaran-umum)
+- [Fitur](#fitur)
+- [Arsitektur](#arsitektur)
+- [Prasyarat](#prasyarat)
+- [Instalasi](#instalasi)
+- [Struktur Proyek](#struktur-proyek)
+- [Konfigurasi](#konfigurasi)
+- [Cara Penggunaan](#cara-penggunaan)
+- [Output Monitoring](#output-monitoring)
 - [Troubleshooting](#troubleshooting)
-- [Contributing](#contributing)
+- [Kontribusi](#kontribusi)
 
-## 🎯 Overview
+## 🎯 Gambaran Umum
 
-This project simulates a real-time warehouse monitoring system for a logistics company managing multiple warehouses storing sensitive goods (food, medicine, electronics). The system monitors temperature and humidity sensors that send data every second and provides real-time alerts for critical conditions.
+Proyek ini mensimulasikan sistem monitoring gudang real-time untuk sebuah perusahaan logistik yang mengelola beberapa gudang penyimpanan barang sensitif (makanan, obat-obatan, elektronik). Sistem memantau sensor suhu dan kelembaban yang mengirim data setiap detik dan memberikan peringatan real-time untuk kondisi kritis.
 
-### Problem Statement
-- Multiple warehouses with sensitive goods storage
-- Two types of sensors: Temperature and Humidity sensors
-- Data transmission every second
-- Real-time monitoring to prevent damage from high temperature or excessive humidity
+### Latar Belakang Masalah
+- Beberapa gudang dengan penyimpanan barang sensitif
+- Dua jenis sensor: Sensor Suhu dan Sensor Kelembaban
+- Transmisi data setiap detik
+- Monitoring real-time untuk mencegah kerusakan akibat suhu tinggi atau kelembaban berlebih
 
-## ✨ Features
+## ✨ Fitur
 
-- **Real-time Data Streaming**: Kafka producers simulate sensor data every second
-- **Stream Processing**: PySpark processes data streams with filtering and joins
-- **Alert System**: Automated alerts for critical conditions
-- **Multi-condition Monitoring**:
-  - Temperature > 80°C → High temperature warning
-  - Humidity > 70% → High humidity warning
-  - Both conditions → Critical warning
-- **Time-window Joins**: Combines temperature and humidity data within 10-second windows
+- **Streaming Data Real-time**: Producer Kafka mensimulasikan data sensor setiap detik
+- **Pemrosesan Stream**: PySpark memproses stream data dengan filtering dan join
+- **Sistem Peringatan**: Peringatan otomatis untuk kondisi kritis
+- **Monitoring Multi-kondisi**:
+  - Suhu > 80°C → Peringatan suhu tinggi
+  - Kelembaban > 70% → Peringatan kelembaban tinggi
+  - Kedua kondisi → Peringatan kritis
+- **Time-window Joins**: Menggabungkan data suhu dan kelembaban dalam window 10 detik
 
-## 🏗️ Architecture
+## 🏗️ Arsitektur
 
 ```
-Sensors → Kafka Producers → Kafka Topics → PySpark Consumer → Alerts
-    ↓           ↓               ↓              ↓             ↓
-Temperature  Humidity    sensor-suhu-    Stream Processing  Console
-  Sensor     Sensor     gudang Topic    & Filtering       Output
-                        sensor-kelembaban-
-                        gudang Topic
+Sensor → Producer Kafka → Topik Kafka → Consumer PySpark → Peringatan
+   ↓         ↓               ↓              ↓               ↓
+Sensor    Sensor      sensor-suhu-    Pemrosesan Stream    Output
+Suhu   Kelembaban     gudang Topic    & Filtering         Console
+                      sensor-kelembaban-
+                      gudang Topic
 ```
 
-## 📋 Prerequisites
+## 📋 Prasyarat
 
-- **Operating System**: Linux/WSL2
-- **Java**: OpenJDK 11 or later
-- **Python**: 3.8 or later
-- **Memory**: At least 4GB RAM
-- **Storage**: 2GB free space
+- **Sistem Operasi**: Linux/WSL2
+- **Java**: OpenJDK 11 atau lebih baru
+- **Python**: 3.8 atau lebih baru
+- **Memory**: Minimal 4GB RAM
+- **Storage**: 2GB ruang kosong
 
-## 🔧 Installation
+## 🔧 Instalasi
 
-### 1. System Updates and Java Installation
+### 1. Update Sistem dan Instalasi Java
 
 ```bash
-# Update system
+# Update sistem
 sudo apt update && sudo apt upgrade -y
 
 # Install OpenJDK 11
 sudo apt install openjdk-11-jdk -y
 
-# Verify Java installation
+# Verifikasi instalasi Java
 java -version
 
-# Set JAVA_HOME environment variable
+# Set environment variable JAVA_HOME
 echo 'export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64' >> ~/.bashrc
 echo 'export PATH=$PATH:$JAVA_HOME/bin' >> ~/.bashrc
 source ~/.bashrc
 ```
 
-### 2. Python Dependencies
+### 2. Dependencies Python
 
 ```bash
-# Install Python and pip
+# Install Python dan pip
 sudo apt install python3 python3-pip -y
 
-# Install required Python libraries
+# Install library Python yang diperlukan
 pip3 install kafka-python pyspark findspark
 ```
 
-### 3. Apache Kafka Installation
+### 3. Instalasi Apache Kafka
 
 ```bash
-# Create Kafka directory
+# Buat direktori Kafka
 mkdir ~/kafka-setup && cd ~/kafka-setup
 
-# Download Kafka (try multiple options if one fails)
-# Option 1: Kafka 3.5.1
+# Download Kafka (coba beberapa opsi jika ada yang gagal)
+# Opsi 1: Kafka 3.5.1
 wget https://downloads.apache.org/kafka/3.5.1/kafka_2.13-3.5.1.tgz
 
-# Option 2: If above fails, try 3.4.1
+# Opsi 2: Jika gagal, coba 3.4.1
 # wget https://downloads.apache.org/kafka/3.4.1/kafka_2.13-3.4.1.tgz
 
-# Option 3: Use archive mirror
+# Opsi 3: Gunakan mirror archive
 # wget https://archive.apache.org/dist/kafka/3.5.1/kafka_2.13-3.5.1.tgz
 
 # Extract Kafka
 tar -xzf kafka_2.13-3.5.1.tgz
 cd kafka_2.13-3.5.1
 
-# Set Kafka environment variables
+# Set environment variable Kafka
 echo 'export KAFKA_HOME=~/kafka-setup/kafka_2.13-3.5.1' >> ~/.bashrc
 echo 'export PATH=$PATH:$KAFKA_HOME/bin' >> ~/.bashrc
 source ~/.bashrc
 ```
 
-### 4. Apache Spark Installation
+### 4. Instalasi Apache Spark
 
 ```bash
 # Download Spark
 cd ~/kafka-setup
 
-# Option 1: Spark 3.4.1 (recommended)
+# Opsi 1: Spark 3.4.1 (direkomendasikan)
 wget https://downloads.apache.org/spark/spark-3.4.1/spark-3.4.1-bin-hadoop3.tgz
 
-# Option 2: If above fails, try 3.3.4 LTS
+# Opsi 2: Jika gagal, coba 3.3.4 LTS
 # wget https://downloads.apache.org/spark/spark-3.3.4/spark-3.3.4-bin-hadoop3.tgz
 
-# Option 3: Use archive mirror
+# Opsi 3: Gunakan mirror archive
 # wget https://archive.apache.org/dist/spark/spark-3.4.1/spark-3.4.1-bin-hadoop3.tgz
 
 # Extract Spark
 tar -xzf spark-3.4.1-bin-hadoop3.tgz
 
-# Set Spark environment variables
+# Set environment variable Spark
 echo 'export SPARK_HOME=~/kafka-setup/spark-3.4.1-bin-hadoop3' >> ~/.bashrc
 echo 'export PATH=$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin' >> ~/.bashrc
 echo 'export PYSPARK_PYTHON=python3' >> ~/.bashrc
@@ -141,17 +139,17 @@ source ~/.bashrc
 ### 5. Kafka-Spark Connector
 
 ```bash
-# Download required JAR files for Kafka-Spark integration
+# Download file JAR yang diperlukan untuk integrasi Kafka-Spark
 cd $SPARK_HOME/jars
 
-# For Spark 3.4.1
+# Untuk Spark 3.4.1
 wget https://repo1.maven.org/maven2/org/apache/spark/spark-sql-kafka-0-10_2.12/3.4.1/spark-sql-kafka-0-10_2.12-3.4.1.jar
 wget https://repo1.maven.org/maven2/org/apache/kafka/kafka-clients/3.4.1/kafka-clients-3.4.1.jar
 wget https://repo1.maven.org/maven2/org/apache/spark/spark-token-provider-kafka-0-10_2.12/3.4.1/spark-token-provider-kafka-0-10_2.12-3.4.1.jar
 wget https://repo1.maven.org/maven2/org/apache/commons/commons-pool2/2.11.1/commons-pool2-2.11.1.jar
 ```
 
-### 6. Create Kafka Topics
+### 6. Membuat Topik Kafka
 
 ```bash
 # Start Zookeeper (Terminal 1)
@@ -162,47 +160,47 @@ bin/zookeeper-server-start.sh config/zookeeper.properties
 cd ~/kafka-setup/kafka_2.13-3.5.1
 bin/kafka-server-start.sh config/server.properties
 
-# Create topics (Terminal 3)
+# Buat topik (Terminal 3)
 cd ~/kafka-setup/kafka_2.13-3.5.1
 
-# Create temperature topic
+# Buat topik suhu
 bin/kafka-topics.sh --create --topic sensor-suhu-gudang --bootstrap-server localhost:9092 --partitions 3 --replication-factor 1
 
-# Create humidity topic
+# Buat topik kelembaban
 bin/kafka-topics.sh --create --topic sensor-kelembaban-gudang --bootstrap-server localhost:9092 --partitions 3 --replication-factor 1
 
-# Verify topics
+# Verifikasi topik
 bin/kafka-topics.sh --list --bootstrap-server localhost:9092
 ```
 
-## 📁 Project Structure
+## 📁 Struktur Proyek
 
 ```
 kafka-warehouse-monitoring/
 ├── config/
-│   └── kafka_config.py          # Kafka configuration
+│   └── kafka_config.py          # Konfigurasi Kafka
 ├── producers/
-│   ├── temperature_producer.py  # Temperature sensor producer
-│   └── humidity_producer.py     # Humidity sensor producer
+│   ├── temperature_producer.py  # Producer sensor suhu
+│   └── humidity_producer.py     # Producer sensor kelembaban
 ├── consumer/
-│   └── spark_consumer.py        # PySpark stream consumer
+│   └── spark_consumer.py        # Consumer stream PySpark
 ├── README.md
 └── requirements.txt
 ```
 
-### Create Project Structure
+### Buat Struktur Proyek
 
 ```bash
-# Create project directory
+# Buat direktori proyek
 mkdir -p ~/kafka-warehouse-monitoring/{producers,consumer,config}
 cd ~/kafka-warehouse-monitoring
 ```
 
-## ⚙️ Configuration
+## ⚙️ Konfigurasi
 
 ### config/kafka_config.py
 ```python
-# Kafka configuration
+# Konfigurasi Kafka
 KAFKA_SERVERS = ['localhost:9092']
 TOPICS = {
     'temperature': 'sensor-suhu-gudang',
@@ -218,9 +216,9 @@ pyspark==3.4.1
 findspark==2.0.1
 ```
 
-## 🚀 Usage
+## 🚀 Cara Penggunaan
 
-### Step 1: Start Kafka Services
+### Langkah 1: Start Layanan Kafka
 
 ```bash
 # Terminal 1: Start Zookeeper
@@ -232,31 +230,31 @@ cd ~/kafka-setup/kafka_2.13-3.5.1
 bin/kafka-server-start.sh config/server.properties
 ```
 
-### Step 2: Start Producers
+### Langkah 2: Start Producer
 
 ```bash
-# Terminal 3: Start Temperature Producer
+# Terminal 3: Start Producer Suhu
 cd ~/kafka-warehouse-monitoring
 python3 producers/temperature_producer.py
 
-# Terminal 4: Start Humidity Producer
+# Terminal 4: Start Producer Kelembaban
 cd ~/kafka-warehouse-monitoring
 python3 producers/humidity_producer.py
 ```
 
-### Step 3: Start Consumer
+### Langkah 3: Start Consumer
 
 ```bash
-# Terminal 5: Start PySpark Consumer
+# Terminal 5: Start Consumer PySpark
 cd ~/kafka-warehouse-monitoring
 python3 consumer/spark_consumer.py
 ```
 
-## 📊 Monitoring Output
+## 📊 Output Monitoring
 
-The system produces three types of monitoring outputs:
+Sistem menghasilkan tiga jenis output monitoring:
 
-### 1. Temperature Alerts
+### 1. Peringatan Suhu
 ```
 ==================================================
 [PERINGATAN SUHU TINGGI]
@@ -266,7 +264,7 @@ Gudang G3: Suhu 82°C
 ==================================================
 ```
 
-### 2. Humidity Alerts
+### 2. Peringatan Kelembaban
 ```
 ==================================================
 [PERINGATAN KELEMBABAN TINGGI]
@@ -276,7 +274,7 @@ Gudang G1: Kelembaban 73%
 ==================================================
 ```
 
-### 3. Combined Status
+### 3. Status Gabungan
 ```
 ======================================================================
 [STATUS GABUNGAN GUDANG]
@@ -300,65 +298,119 @@ Gudang G3:
 
 ## 🐛 Troubleshooting
 
-### Common Issues and Solutions
+### Masalah Umum dan Solusi
 
-#### 1. Port Already in Use
+#### 1. Port Sudah Digunakan
 ```bash
-# Check processes using port 9092
+# Cek proses yang menggunakan port 9092
 sudo lsof -i :9092
 
-# Kill process if necessary
+# Kill proses jika diperlukan
 sudo kill -9 <PID>
 ```
 
-#### 2. Memory Issues
+#### 2. Masalah Memory
 ```bash
-# Set JAVA_OPTS for Kafka
+# Set JAVA_OPTS untuk Kafka
 export KAFKA_HEAP_OPTS="-Xmx512M -Xms512M"
 
-# Set Spark memory
+# Set memory Spark
 export SPARK_DRIVER_MEMORY=1g
 export SPARK_EXECUTOR_MEMORY=1g
 ```
 
-#### 3. Clear Kafka Logs
+#### 3. Bersihkan Log Kafka
 ```bash
 cd ~/kafka-setup/kafka_2.13-3.5.1
 rm -rf /tmp/kafka-logs /tmp/zookeeper
 ```
 
-#### 4. Timestamp Type Error
-If you encounter timestamp type errors, ensure the consumer code properly converts string timestamps to timestamp type:
+#### 4. Error Tipe Timestamp
+Jika mengalami error tipe timestamp, pastikan kode consumer mengkonversi string timestamp ke tipe timestamp dengan benar:
 ```python
 .withColumn("event_time", to_timestamp(col("timestamp"))) \
 .drop("timestamp") \
 .withColumnRenamed("event_time", "timestamp")
 ```
 
-### Verification Commands
+### Perintah Verifikasi
 
-#### Check Kafka Topics
+#### Cek Topik Kafka
 ```bash
 cd ~/kafka-setup/kafka_2.13-3.5.1
 bin/kafka-topics.sh --list --bootstrap-server localhost:9092
 ```
 
-#### Monitor Topics Manually
+#### Monitor Topik Manual
 ```bash
-# Monitor temperature topic
+# Monitor topik suhu
 bin/kafka-console-consumer.sh --topic sensor-suhu-gudang --from-beginning --bootstrap-server localhost:9092
 
-# Monitor humidity topic
+# Monitor topik kelembaban
 bin/kafka-console-consumer.sh --topic sensor-kelembaban-gudang --from-beginning --bootstrap-server localhost:9092
 ```
 
-#### Verify Java and Python
+#### Verifikasi Java dan Python
 ```bash
 java -version
 python3 --version
 spark-shell --version
 ```
 
+## 🏆 Tujuan Pembelajaran
+
+Proyek ini mendemonstrasikan:
+- Pemrosesan data real-time dengan Apache Kafka
+- Pemrosesan stream dan filtering dengan PySpark
+- Multi-stream joins dengan time windows
+- Event-time processing dan watermarking
+- Sistem peringatan real-time
+- Arsitektur microservices dengan message queues
+
+## 📝 Fitur yang Diimplementasikan
+
+- [x] Dua topik Kafka: `sensor-suhu-gudang` dan `sensor-kelembaban-gudang`
+- [x] Producer suhu mengirim data setiap detik
+- [x] Producer kelembaban mengirim data setiap detik
+- [x] Dukungan untuk 3 gudang: G1, G2, G3
+- [x] Consumer PySpark untuk konsumsi data
+- [x] Filtering: suhu > 80°C dan kelembaban > 70%
+- [x] Stream joining berdasarkan ID gudang dan time window
+- [x] Deteksi kondisi kritis (suhu > 80°C DAN kelembaban > 70%)
+- [x] Output console terformat dengan peringatan
+
+## 🤝 Kontribusi
+
+1. Fork repository ini
+2. Buat feature branch (`git checkout -b feature/FiturMenakjubkan`)
+3. Commit perubahan Anda (`git commit -m 'Menambahkan FiturMenakjubkan'`)
+4. Push ke branch (`git push origin feature/FiturMenakjubkan`)
+5. Buka Pull Request
+
+## 📄 Lisensi
+
+Proyek ini dilisensikan di bawah Lisensi MIT - lihat file [LICENSE](LICENSE) untuk detail.
+
+## 🙏 Ucapan Terima Kasih
+
+- Komunitas Apache Kafka
+- Komunitas Apache Spark
+- Komunitas Python Kafka
+
+## 📞 Dukungan
+
+Jika mengalami masalah:
+1. Periksa bagian [Troubleshooting](#troubleshooting)
+2. Verifikasi semua prasyarat terpenuhi
+3. Pastikan semua layanan berjalan dengan urutan yang benar
+4. Periksa log untuk pesan error spesifik
+
+## 📚 Referensi Tambahan
+
+- [Dokumentasi Apache Kafka](https://kafka.apache.org/documentation/)
+- [Dokumentasi Apache Spark](https://spark.apache.org/docs/latest/)
+- [PySpark Structured Streaming Guide](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html)
+
 ---
 
-**Happy Monitoring! 🚀**
+**Selamat Monitoring! 🚀**
