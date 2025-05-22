@@ -359,54 +359,6 @@ python3 --version
 spark-shell --version
 ```
 
-## 🏆 Learning Objectives
-
-This project demonstrates:
-- Real-time data processing with Apache Kafka
-- Stream processing and filtering with PySpark
-- Multi-stream joins with time windows
-- Event-time processing and watermarking
-- Real-time alerting systems
-- Microservices architecture with message queues
-
-## 📝 Features Implemented
-
-- [x] Two Kafka topics: `sensor-suhu-gudang` and `sensor-kelembaban-gudang`
-- [x] Temperature producer sending data every second
-- [x] Humidity producer sending data every second
-- [x] Support for 3 warehouses: G1, G2, G3
-- [x] PySpark consumer for data consumption
-- [x] Filtering: temperature > 80°C and humidity > 70%
-- [x] Stream joining based on warehouse ID and time window
-- [x] Critical condition detection (temperature > 80°C AND humidity > 70%)
-- [x] Formatted console output with alerts
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- Apache Kafka Community
-- Apache Spark Community
-- Python Kafka Community
-
-## 📞 Support
-
-If you encounter any issues:
-1. Check the [Troubleshooting](#troubleshooting) section
-2. Verify all prerequisites are met
-3. Ensure all services are running in the correct order
-4. Check logs for specific error messages
-
 ---
 
 **Happy Monitoring! 🚀**
