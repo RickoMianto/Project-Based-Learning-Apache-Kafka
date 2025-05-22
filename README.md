@@ -249,6 +249,9 @@ Gudang G3: Suhu 82°C
 ==================================================
 ```
 
+![Screenshot 2025-05-22 202401](https://github.com/user-attachments/assets/53eddbf0-1eb2-4dd9-b30b-7403eeb98c29)
+
+
 ### 2. Peringatan Kelembaban
 ```
 ==================================================
@@ -258,6 +261,9 @@ Gudang G2: Kelembaban 75%
 Gudang G1: Kelembaban 73%
 ==================================================
 ```
+
+![Screenshot 2025-05-22 202415](https://github.com/user-attachments/assets/87654d0f-a465-4c8f-b6d1-a5fd32c7c29c)
+
 
 ### 3. Status Gabungan
 ```
@@ -280,6 +286,9 @@ Gudang G3:
   - Status: Suhu tinggi, kelembaban normal
 ======================================================================
 ```
+
+![Screenshot 2025-05-22 202429](https://github.com/user-attachments/assets/a92ebf31-b02e-435a-804b-00f36628cb3c)
+
 
 ## Troubleshooting
 
